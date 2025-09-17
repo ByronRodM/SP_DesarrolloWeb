@@ -22,6 +22,6 @@ class Usuario extends Authenticatable
 
     // Ocultar el password al devolver el modelo en JSON
     protected $hidden = [
-        'password',
+        'password'
     ];
 }

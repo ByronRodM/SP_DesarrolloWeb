@@ -69,7 +69,14 @@ class UsuarioController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $usuario = Usuario::find($id);
+        if(!$usuario){
+            return response()->json([
+                'message' => 'Usuario no encontrado',
+                'status' => false
+            ], 404);
+        }
+        return response()->json($usuario);
     }
 
     /**
@@ -128,6 +135,23 @@ class UsuarioController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $usuario = Usuario::find($id);
+        if(!$usuario){
+            return response()->json([
+                'message' => 'Usuario no encontrado',
+                'status' => false
+            ], 404);
+        }
+        if($usuario->rol === 'admin'){
+            return response()->json([
+                'message' => 'No se puede eliminar un usuario admin',
+                'status' => false
+            ], 422);
+        }
+        $usuario->delete();
+        return response()->json([
+            'message' => 'Usuario eliminado correctamente',
+            'status' => true
+        ]);
     }
 }
