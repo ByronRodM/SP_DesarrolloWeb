@@ -15,6 +15,14 @@
             Agregar usuario
           </v-btn>
 
+          <!-- Ver tareas: cualquier rol -->
+          <v-btn
+            block color="secondary" class="mb-3"
+            @click="goTareas"
+          >
+            Ver tareas
+          </v-btn>
+
           <!-- Buscar (filtra en UsersList) -->
           <v-text-field
             v-model="search"
@@ -68,6 +76,7 @@ onMounted(() => {
 const isAdmin = computed(() => user.value?.rol === 'admin')
 
 const goAddUser = () => router.push('/usuarios/nuevo')
+const goTareas = () => router.push('/tareas')
 
 const logout = () => {
   localStorage.removeItem('token')
