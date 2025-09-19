@@ -16,21 +16,24 @@ use App\Http\Controllers\Api\TareaController;
 |
 */
 
+// Usuario autenticado actual
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
-// Rutas para el controlador de usuarios, asignando nombres personalizados
 
-Route::prefix('usuarios')->group(function () {
+// Auth (público): login y registro
+Route::post('/login', [AuthController::class, 'login']);
+Route::post('/register', [AuthController::class, 'register']);
+Route::middleware('auth:sanctum')->post('/logout', [AuthController::class, 'logout']);
+
+// CRUD de usuarios protegido (cumple requisito: 401 si no hay token válido)
+Route::middleware('auth:sanctum')->prefix('usuarios')->group(function () {
     Route::get('/listUsers', [UsuarioController::class, 'index']);
     Route::post('/addUser', [UsuarioController::class, 'store']);
     Route::get('/getUser/{id}', [UsuarioController::class, 'show']);
     Route::put('/updateUser/{id}', [UsuarioController::class, 'update']);
     Route::delete('/deleteUser/{id}', [UsuarioController::class, 'destroy']);
 });
-
-Route::post('/login', [AuthController::class, 'login']);
-Route::middleware('auth:sanctum')->post('/logout', [AuthController::class, 'logout']);
 
 // Rutas de tareas (requieren autenticación)
 Route::middleware('auth:sanctum')->prefix('tareas')->group(function(){
