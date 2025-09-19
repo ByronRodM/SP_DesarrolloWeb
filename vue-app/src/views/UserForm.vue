@@ -2,7 +2,6 @@
     <v-container class="py-8" style="max-width: 800px">
         <v-card class="pa-6">
             <div class="d-flex align-center mb-4">
-                <v-btn icon="mdi-arrow-left" variant="text" @click="goBack" class="mr-2" />
                 <h2 class="text-h6 mb-0">{{ isEdit ? "Editar usuario" : "Nuevo usuario" }}</h2>
             </div>
 
