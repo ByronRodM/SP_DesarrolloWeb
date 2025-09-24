@@ -24,7 +24,7 @@ export const clearAuth = () => {
 
 api.interceptors.request.use((config) => {
     // Rutas que no deben llevar token (relativas al baseURL)
-    const noAuthEndpoints = ["/login", "/register"];
+    const noAuthEndpoints = ["/login"];
     const urlPath = (config.url || "").replace(/^https?:\/\/[^/]+/, ""); // normalizar
     if (!noAuthEndpoints.includes(urlPath)) {
         const token = getToken();

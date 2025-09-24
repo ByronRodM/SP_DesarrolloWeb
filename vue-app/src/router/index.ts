@@ -5,6 +5,12 @@ const router = createRouter({
     routes: [
         { path: "/", redirect: "/usuarios" },
         { path: "/login", name: "login", component: () => import("@/views/LoginView.vue") },
+        {
+            path: "/change-password",
+            name: "change-password",
+            component: () => import("@/views/ChangePasswordView.vue"),
+            meta: { requiresAuth: true },
+        },
 
         {
             path: "/usuarios",
@@ -47,8 +53,29 @@ const router = createRouter({
 
 router.beforeEach((to) => {
     const token = localStorage.getItem("token");
+    const userStr = localStorage.getItem("user");
+
+    // Si no hay token y la ruta requiere auth, redirigir a login
     if (to.meta.requiresAuth && !token) return { name: "login", query: { redirect: to.fullPath } };
+
+    // Si ya está logueado y trata de ir a login, redirigir a usuarios
     if (to.name === "login" && token) return { name: "usuarios" };
+
+    // Verificar si debe cambiar contraseña (solo si está autenticado)
+    if (token && userStr && to.name !== "change-password") {
+        try {
+            const user = JSON.parse(userStr);
+            if (user.must_change_password) {
+                return { name: "change-password" };
+            }
+        } catch (e) {
+            // Si hay error parseando el usuario, limpiar y redirigir a login
+            localStorage.removeItem("token");
+            localStorage.removeItem("user");
+            return { name: "login" };
+        }
+    }
+
     return true;
 });
 

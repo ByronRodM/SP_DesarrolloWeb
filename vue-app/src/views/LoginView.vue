@@ -7,15 +7,37 @@
             </div>
 
             <v-form v-model="valid" @submit.prevent="onSubmit">
-                <v-text-field v-model="email" label="Email" type="email" :rules="[rules.required, rules.email]"
-                    prepend-inner-icon="mdi-email" density="comfortable" clearable />
-                <v-text-field v-model="password" label="Password" type="password" :rules="[rules.required, rules.min6]"
-                    prepend-inner-icon="mdi-lock" density="comfortable" clearable />
+                <v-text-field
+                    v-model="email"
+                    label="Email"
+                    type="email"
+                    :rules="[rules.required, rules.email]"
+                    prepend-inner-icon="mdi-email"
+                    density="comfortable"
+                    clearable />
+                <v-text-field
+                    v-model="password"
+                    label="Password"
+                    type="password"
+                    :rules="[rules.required, rules.min6]"
+                    prepend-inner-icon="mdi-lock"
+                    density="comfortable"
+                    clearable />
 
-                <v-alert v-if="errorMsg" type="error" variant="tonal" class="mb-3" :text="errorMsg"
+                <v-alert
+                    v-if="errorMsg"
+                    type="error"
+                    variant="tonal"
+                    class="mb-3"
+                    :text="errorMsg"
                     density="comfortable" />
 
-                <v-btn :loading="loading" :disabled="!valid || loading" type="submit" color="primary" class="w-full">
+                <v-btn
+                    :loading="loading"
+                    :disabled="!valid || loading"
+                    type="submit"
+                    color="primary"
+                    class="w-full">
                     Entrar
                 </v-btn>
             </v-form>
@@ -24,51 +46,58 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
-import api from '@/services/api'
+import { ref } from "vue";
+import { useRouter, useRoute } from "vue-router";
+import api from "@/services/api";
 
-const router = useRouter()
-const route = useRoute()
+const router = useRouter();
+const route = useRoute();
 
-const email = ref('')
-const password = ref('')
-const loading = ref(false)
-const valid = ref(false)
-const errorMsg = ref('')
+const email = ref("");
+const password = ref("");
+const loading = ref(false);
+const valid = ref(false);
+const errorMsg = ref("");
 
 const rules = {
-    required: (v: string) => !!v || 'Requerido',
-    email: (v: string) => /.+@.+\..+/.test(v) || 'Email inválido',
-    min6: (v: string) => (v?.length ?? 0) >= 6 || 'Mínimo 6 caracteres',
-}
+    required: (v: string) => !!v || "Requerido",
+    email: (v: string) => /.+@.+\..+/.test(v) || "Email inválido",
+    min6: (v: string) => (v?.length ?? 0) >= 6 || "Mínimo 6 caracteres",
+};
 
 const onSubmit = async () => {
-    errorMsg.value = ''
-    loading.value = true
+    errorMsg.value = "";
+    loading.value = true;
     try {
         // Llamada a tu endpoint
-        const { data } = await api.post('/login', {
+        const { data } = await api.post("/login", {
             email: email.value,
             password: password.value,
-        })
+        });
 
         // Guardar token y usuario
-        localStorage.setItem('token', data.token)
-        localStorage.setItem('user', JSON.stringify(data.usuario))
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("user", JSON.stringify(data.usuario));
+
+        // Verificar si debe cambiar contraseña
+        if (data.must_change_password) {
+            router.push("/change-password");
+            return;
+        }
 
         // Redirigir (a lo que tengas, por ejemplo /usuarios)
-        const redirect = (route.query.redirect as string) || '/usuarios'
-        router.push(redirect)
+        const redirect = (route.query.redirect as string) || "/usuarios";
+        router.push(redirect);
     } catch (e: any) {
         // Mensaje claro desde backend o genérico
-        errorMsg.value = e?.response?.data?.message
-            || e?.response?.data?.errors?.email?.[0]
-            || 'No se pudo iniciar sesión. Verifica tus credenciales.'
+        errorMsg.value =
+            e?.response?.data?.message ||
+            e?.response?.data?.errors?.email?.[0] ||
+            "No se pudo iniciar sesión. Verifica tus credenciales.";
     } finally {
-        loading.value = false
+        loading.value = false;
     }
-}
+};
 </script>
 
 <style scoped>
@@ -85,7 +114,7 @@ const onSubmit = async () => {
 }
 
 .mb-3 {
-    margin-bottom: .75rem;
+    margin-bottom: 0.75rem;
 }
 
 .mb-4 {
@@ -113,11 +142,11 @@ const onSubmit = async () => {
 }
 
 .text-sm {
-    font-size: .875rem;
+    font-size: 0.875rem;
 }
 
 .text-xs {
-    font-size: .75rem;
+    font-size: 0.75rem;
 }
 
 .text-gray-500 {
