@@ -60,6 +60,37 @@ class AuthController extends Controller
             'message' => 'Login exitoso',
             'usuario' => $usuario,
             'token'   => $token,
+            'must_change_password' => $usuario->must_change_password,
+        ]);
+    }
+
+    /**
+     * Cambio de contraseña forzado
+     */
+    public function changePassword(Request $request)
+    {
+        $request->validate([
+            'current_password' => 'required|string',
+            'new_password' => 'required|string|min:8|confirmed',
+        ]);
+
+        $usuario = $request->user();
+
+        // Verificar contraseña actual
+        if (!Hash::check($request->current_password, $usuario->password)) {
+            throw ValidationException::withMessages([
+                'current_password' => ['La contraseña actual es incorrecta.'],
+            ]);
+        }
+
+        // Actualizar contraseña y remover flag de cambio forzado
+        $usuario->update([
+            'password' => Hash::make($request->new_password),
+            'must_change_password' => false,
+        ]);
+
+        return response()->json([
+            'message' => 'Contraseña actualizada exitosamente',
         ]);
     }
 

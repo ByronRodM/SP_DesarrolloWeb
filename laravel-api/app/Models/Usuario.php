@@ -18,10 +18,15 @@ class Usuario extends Authenticatable
         'email',
         'password',
         'rol',
+        'must_change_password',
     ];
 
     // Ocultar el password al devolver el modelo en JSON
     protected $hidden = [
         'password'
+    ];
+
+    protected $casts = [
+        'must_change_password' => 'boolean',
     ];
 }

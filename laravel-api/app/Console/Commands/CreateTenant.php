@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use Illuminate\Console\Command;
 use App\Models\Tenant;
 use Stancl\Tenancy\Database\Models\Domain;
+use Illuminate\Support\Facades\Hash;
 
 class CreateTenant extends Command
 {
@@ -40,11 +41,36 @@ class CreateTenant extends Command
             $this->call('tenants:migrate', [
                 '--tenants' => [$tenant->id],
             ]);
+
+            // Crear usuario admin por defecto
+            $this->createDefaultAdmin($tenant);
         } else {
             $this->line('Omitiendo migraciones (--no-migrate).');
         }
 
         $this->info('Listo.');
         return Command::SUCCESS;
+    }
+
+    /**
+     * Crea el usuario admin por defecto para el tenant
+     */
+    private function createDefaultAdmin(Tenant $tenant): void
+    {
+        // Inicializar contexto del tenant para usar su base de datos
+        tenancy()->initialize($tenant);
+
+        $adminEmail = "admin@{$tenant->id}.localhost";
+
+        \App\Models\Usuario::create([
+            'nombre' => 'Administrador',
+            'email' => $adminEmail,
+            'password' => Hash::make('segundoparcial'),
+            'rol' => 'admin',
+            'must_change_password' => true,
+        ]);
+
+        $this->info("✓ Usuario admin creado (email: '{$adminEmail}', password: 'segundoparcial')");
+        $this->warn("⚠ El admin debe cambiar la contraseña en su primer login");
     }
 }

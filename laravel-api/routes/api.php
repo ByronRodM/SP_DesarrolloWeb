@@ -21,10 +21,12 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-// Auth (público): login y registro
+// Auth (público): solo login
 Route::post('/login', [AuthController::class, 'login']);
-Route::post('/register', [AuthController::class, 'register']);
 Route::middleware('auth:sanctum')->post('/logout', [AuthController::class, 'logout']);
+
+// Cambio de contraseña forzado para admins con contraseña por defecto
+Route::middleware('auth:sanctum')->post('/change-password', [AuthController::class, 'changePassword']);
 
 // CRUD de usuarios protegido (cumple requisito: 401 si no hay token válido)
 Route::middleware('auth:sanctum')->prefix('usuarios')->group(function () {
