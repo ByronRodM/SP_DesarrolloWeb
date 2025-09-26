@@ -23,14 +23,14 @@ const router = createRouter({
             path: "/usuarios/nuevo",
             name: "usuarios-nuevo",
             component: () => import("@/views/UserForm.vue"),
-            meta: { requiresAuth: true },
+            meta: { requiresAuth: true, roles: ["admin"] },
         },
         {
             path: "/usuarios/:id/editar",
             name: "usuarios-editar",
             component: () => import("@/views/UserForm.vue"),
             props: true,
-            meta: { requiresAuth: true },
+            meta: { requiresAuth: true, roles: ["admin"] },
         },
 
         // Tareas
@@ -44,7 +44,7 @@ const router = createRouter({
             path: "/tareas/nueva",
             name: "tareas-nueva",
             component: () => import("@/views/TareaForm.vue"),
-            meta: { requiresAuth: true },
+            meta: { requiresAuth: true, roles: ["admin"] },
         },
 
         { path: "/:pathMatch(.*)*", redirect: "/usuarios" },
@@ -72,6 +72,21 @@ router.beforeEach((to) => {
             // Si hay error parseando el usuario, limpiar y redirigir a login
             localStorage.removeItem("token");
             localStorage.removeItem("user");
+            return { name: "login" };
+        }
+    }
+
+    // Verificación de roles si se definieron en la ruta
+    if (to.meta?.roles) {
+        if (!userStr) return { name: "login" };
+        try {
+            const user = JSON.parse(userStr);
+            const allowed = (to.meta.roles as string[]).includes(user.rol);
+            if (!allowed) {
+                // Redirigir a listado como fallback
+                return { name: "usuarios" };
+            }
+        } catch {
             return { name: "login" };
         }
     }

@@ -28,19 +28,29 @@ Route::middleware('auth:sanctum')->post('/logout', [AuthController::class, 'logo
 // Cambio de contraseña forzado para admins con contraseña por defecto
 Route::middleware('auth:sanctum')->post('/change-password', [AuthController::class, 'changePassword']);
 
-// CRUD de usuarios protegido (cumple requisito: 401 si no hay token válido)
+// CRUD de usuarios protegido
 Route::middleware('auth:sanctum')->prefix('usuarios')->group(function () {
+    // Lectura accesible a cualquier usuario autenticado
     Route::get('/listUsers', [UsuarioController::class, 'index']);
-    Route::post('/addUser', [UsuarioController::class, 'store']);
     Route::get('/getUser/{id}', [UsuarioController::class, 'show']);
-    Route::put('/updateUser/{id}', [UsuarioController::class, 'update']);
-    Route::delete('/deleteUser/{id}', [UsuarioController::class, 'destroy']);
+
+    // Operaciones de administración solo para rol admin
+    Route::middleware('admin')->group(function(){
+        Route::post('/addUser', [UsuarioController::class, 'store']);
+        Route::put('/updateUser/{id}', [UsuarioController::class, 'update']);
+        Route::delete('/deleteUser/{id}', [UsuarioController::class, 'destroy']);
+    });
 });
 
-// Rutas de tareas (requieren autenticación)
+// Rutas de tareas
 Route::middleware('auth:sanctum')->prefix('tareas')->group(function(){
+    // Lectura disponible a cualquier usuario autenticado
     Route::get('/', [TareaController::class, 'index']);
-    Route::post('/create', [TareaController::class, 'store']);
-    Route::put('/{id}', [TareaController::class, 'update']);
-    Route::get('/export/pending', [TareaController::class, 'exportPending']);
+
+    // Mutaciones y export solo admin
+    Route::middleware('admin')->group(function(){
+        Route::post('/create', [TareaController::class, 'store']);
+        Route::put('/{id}', [TareaController::class, 'update']);
+        Route::get('/export/pending', [TareaController::class, 'exportPending']);
+    });
 });

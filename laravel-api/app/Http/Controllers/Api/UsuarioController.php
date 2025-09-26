@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Usuario;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 
 class UsuarioController extends Controller
@@ -31,6 +32,12 @@ class UsuarioController extends Controller
      */
     public function store(Request $request)
     {
+        // Solo admin puede crear usuarios
+        if (Auth::user()?->rol !== 'admin') {
+            return response()->json([
+                'message' => 'No autorizado: solo admin puede crear usuarios.'
+            ], 403);
+        }
         $validated = $request->validate([
             'nombre' => 'required|string|max:150',
             'email' => 'required|email|max:150|unique:usuarios,email',
@@ -92,14 +99,13 @@ class UsuarioController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        $usuario = Usuario::findOrFail($id);
-
-        if ($usuario->rol !== 'admin') {
+        // Solo admin puede actualizar usuarios
+        if (Auth::user()?->rol !== 'admin') {
             return response()->json([
-                'message' => 'Solo los usuarios con rol admin pueden ser actualizados.',
-                'status' => false
-            ], 422);
+                'message' => 'No autorizado: solo admin puede actualizar usuarios.'
+            ], 403);
         }
+        $usuario = Usuario::findOrFail($id);
 
         $validated = $request->validate([
             'nombre' => 'sometimes|required|string|max:150',
@@ -135,6 +141,12 @@ class UsuarioController extends Controller
      */
     public function destroy(string $id)
     {
+        // Solo admin puede eliminar
+        if (Auth::user()?->rol !== 'admin') {
+            return response()->json([
+                'message' => 'No autorizado: solo admin puede eliminar usuarios.'
+            ], 403);
+        }
         $usuario = Usuario::find($id);
         if(!$usuario){
             return response()->json([
@@ -142,11 +154,11 @@ class UsuarioController extends Controller
                 'status' => false
             ], 404);
         }
+        // Evitar borrar otro admin (opcional: permitir si se desea)
         if($usuario->rol === 'admin'){
             return response()->json([
-                'message' => 'No se puede eliminar un usuario admin',
-                'status' => false
-            ], 422);
+                'message' => 'No se puede eliminar otro usuario admin.'
+            ], 403);
         }
         $usuario->delete();
         return response()->json([
