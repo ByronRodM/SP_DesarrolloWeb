@@ -7,6 +7,9 @@
 
 Se configuró la aplicación para servir múltiples tenants (clientes) bajo distintos subdominios. Cada tenant posee su propia base de datos independiente; los usuarios y tareas de un tenant no son visibles en otro.
 
+-   Comando para crear Tenants:
+-   > php artisan tenant:create nombretenant
+
 ## 2. Enfoque Técnico
 
 -   Paquete utilizado: `stancl/tenancy`
